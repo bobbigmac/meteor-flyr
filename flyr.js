@@ -1,7 +1,7 @@
 
 
 if (Meteor.isClient) {
-  var updateTimer = 300;
+  var updateTimer = 150;
 
   famous.polyfills;
   famous.core.famous;
@@ -32,35 +32,36 @@ if (Meteor.isClient) {
 
     Meteor.autorun(function() {
       var acc = Session.get('acceleration');
-      surface.setContent('X: '+acc.x+'<br/>Y:'+acc.y+'</br>Z:'+acc.z);
-      
-      var baseNudge = 100;
-      var baseCenter = (baseNudge / 2);
+      if(acc) {
+        surface.setContent('X: '+acc.x+'<br/>Y:'+acc.y+'</br>Z:'+acc.z);
+        
+        var baseNudge = 100;
+        var baseCenter = (baseNudge / 2);
 
-      stateModifier.setTransform(
-        Transform.translate(
-          baseCenter-(baseNudge*acc.x), 
-          baseCenter-(baseNudge*acc.y), 
-          600*acc.z
-        ), {
-        duration : updateTimer*2, 
-        curve: 'easeInOut'//'easeOut'
-      });
-
+        stateModifier.setTransform(
+          Transform.translate(
+            baseCenter-(baseNudge*acc.x), 
+            baseCenter-(baseNudge*acc.y), 
+            600*acc.z
+          ), {
+          duration : updateTimer*2, 
+          curve: 'easeInOut'//'easeOut'
+        });
+      }
     });
 
     return true;
   }
 
   function setup() {
-    console.log(navigator.accelerometer ? 'Found accelerometer. Trying to use.' : 'No accelerometer. Simulating.');
+    console.log(navigator.accelerometer ? 'Found accelerometer. Trying to use.' : 'No accelerometer.');
 
     var haveData = false;
     function onAccelerationData(acceleration) {
+      Session.set('acceleration', acceleration);
       if(!haveData) {
         haveData = setupFamous();
       }
-      Session.set('acceleration', acceleration);
     };
 
     function generateAcceleration() {
@@ -73,12 +74,13 @@ if (Meteor.isClient) {
         onAccelerationData({ x: x, y: y, z: z, timestamp: timestamp });
     }
     function simulateAcceleration() {
+      console.log('Starting acceleration simulator');
       window.setInterval(generateAcceleration, updateTimer);
     }
 
     if(navigator.accelerometer) {
       function onError(error) {
-        console.log('error '+error.code+': '+error.message+'. Simulating.');
+        console.log('error '+error.code+': '+error.message+'.');
         simulateAcceleration();
       };
 
