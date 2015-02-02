@@ -51,9 +51,9 @@ if (Meteor.isClient) {
           Transform.translate(
             baseCenter-(baseNudge*acc.x), 
             baseCenter-(baseNudge*acc.y), 
-            1//600*acc.z
+            100*acc.z
           ), {
-          duration : updateTimer*10, 
+          duration : updateTimer*10,
           curve: 'easeInOut', //'easeOut'
           // method: 'spring',
           // dampingRatio : 0.5, 
@@ -112,15 +112,20 @@ if (Meteor.isClient) {
       if(moeHandler) {
         window.removeEventListener('MozOrientation', moeHandler);
       }
-
-      console.log('error '+error.code+': '+error.message+'.');
+      if(error.message) {
+        console.log('error '+error.code+': '+error.message+'.');
+      } else {
+        console.log(JSON.stringify(error));
+      }
       simulateAcceleration();
     };
 
     console.log(navigator.gyroscope ? 'Found gyroscope. Trying to use.' : (navigator.accelerometer ? 'Found accelerometer. Trying to use.' : 'No gyroscope or accelerometer driver.'));
     if(navigator.gyroscope) {
       var options = { frequency: updateTimer };
-      var watchID = navigator.gyroscope.watchAngularSpeed(onAccelerationData, onDeviceError, options);
+      //console.log(JSON.stringify(navigator.gyroscope));
+      var watchID = navigator.gyroscope.watchGyroscope(onAccelerationData, onDeviceError, options);
+      //var watchID = navigator.gyroscope.watchAngularSpeed(onAccelerationData, onDeviceError, options);
       //navigator.gyroscope.clearWatch(watchID);
     }
     else if(navigator.accelerometer) {
